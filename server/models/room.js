@@ -5,16 +5,16 @@ const roomSchema = new mongoose.Schema({
         required: true,
         type: String,
     },
-    roomID :{
+    name :{
         required: true,
         type: String,
         unique: true,
     },
-    numPlayers :{
+    occupancy :{
         required: true,
         type: Number,
     },
-    numRounds :{
+    maxRounds :{
         required: true,
         type: Number,
     },

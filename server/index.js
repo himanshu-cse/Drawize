@@ -27,9 +27,9 @@ mongoose.connect(DB, {useUnifiedTopology: true}).then(() => {
 
 io.on('connection',(socket) =>{
     console.log('connected');
-    socket.on('create_game',async({name, roomID, numPlayers, numRounds}) =>{
+    socket.on('create_game',async({nickname, name, occupancy, maxRounds}) =>{
         try{
-            const isRoomNotNew = await Room.findOne({roomID});
+            const isRoomNotNew = await Room.findOne({name});
             if (isRoomNotNew){
                 socket.emit('roomalreadyexist', 'Room with that ID already exists!');
                 return;
@@ -37,19 +37,19 @@ io.on('connection',(socket) =>{
             let room = new Room();
             const word = getword();
             room.word = word;
-            room.roomID = roomID;
-            room.numPlayers = numPlayers;
-            room.numRounds = numRounds;
+            room.name = name;
+            room.occupancy = occupancy;
+            room.maxRounds = maxRounds;
 
             let player = {
                 socketID: socket.id,
-                name,
+                nickname,
                 isPartyLeader: true,
             }
             room.players.push(player);
             room = await room.save();
             socket.join(room);
-            io.to(name).emit('updateRoom',room);
+            io.to(nickname).emit('updateRoom',room);
 
 
         }catch(err){

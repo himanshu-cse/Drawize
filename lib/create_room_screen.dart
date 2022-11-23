@@ -18,10 +18,10 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
   void createRoom() {
     Map data = {
-      "name": _nameController.text.trim(),
-      "roomID": _roomNameController.text.trim(),
-      "numPlayers": _maxSizeValue,
-      "numRounds": _maxRoundsValue
+      "nickname": _nameController.text.trim(),
+      "name": _roomNameController.text.trim(),
+      "occupancy": _maxSizeValue,
+      "maxRounds": _maxRoundsValue
     };
     if (_nameController.text.isNotEmpty &&
         _roomNameController.text.isNotEmpty &&
