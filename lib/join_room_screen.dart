@@ -1,4 +1,7 @@
+import 'dart:html';
+
 import 'package:drawize/home_screen.dart';
+import 'package:drawize/paint_screen.dart';
 import 'package:drawize/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +15,21 @@ class JoinRoomScreen extends StatefulWidget {
 class _JoinRoomScreenState extends State<JoinRoomScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _roomNameController = TextEditingController();
+
+  void joinRoom() {
+    Map<String, String> data = {
+      "nickname": _nameController.text,
+      "name": _roomNameController.text,
+    };
+    // print(data);
+    if (_nameController.text.isNotEmpty &&
+        _roomNameController.text.isNotEmpty) {
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) =>
+              PaintScreen(data: data, screenFrom: 'joinRoom')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -36,18 +54,18 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
                 controller: _nameController,
-                decoration:InputDecoration(
+                decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   hintText: 'Enter your name',
                   enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.black,width: 2),
-                      borderRadius: BorderRadius.circular(10)
-                  ),
-                  focusedBorder:OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.black,width: 2),
-                      borderRadius: BorderRadius.circular(10)
-                  ),
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.circular(10)),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.circular(10)),
                 ),
               ),
             ),
@@ -56,28 +74,29 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
                 controller: _roomNameController,
-                decoration:InputDecoration(
+                decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   hintText: 'Enter Room ID',
                   enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.black,width: 2),
-                      borderRadius: BorderRadius.circular(10)
-                  ),
-                  focusedBorder:OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.black,width: 2),
-                      borderRadius: BorderRadius.circular(10)
-                  ),
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.circular(10)),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.circular(10)),
                 ),
               ),
             ),
             const SizedBox(height: 40),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: joinRoom,
               style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(const Color.fromRGBO(231,187,61,0.9)),
-                  textStyle:
-                  MaterialStateProperty.all(const TextStyle(color: Colors.white)),
+                  backgroundColor: MaterialStateProperty.all(
+                      const Color.fromRGBO(231, 187, 61, 0.9)),
+                  textStyle: MaterialStateProperty.all(
+                      const TextStyle(color: Colors.white)),
                   minimumSize: MaterialStateProperty.all(
                       Size(MediaQuery.of(context).size.width / 2.5, 50))),
               child: const Text(
@@ -87,9 +106,9 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
             ),
             const SizedBox(height: 30),
             CircleAvatar(
-                radius:32,
+                radius: 32,
                 backgroundColor: Colors.black,
-                child : CircleAvatar(
+                child: CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.greenAccent,
                   child: IconButton(
@@ -101,8 +120,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                     ),
                     icon: const Icon(Icons.arrow_back),
                   ),
-                )
-            )
+                ))
           ],
         ),
       ),

@@ -17,11 +17,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
   String? _maxSizeValue;
 
   void createRoom() {
-    Map data = {
+    Map<String, String> data = {
       "nickname": _nameController.text.trim(),
       "name": _roomNameController.text.trim(),
-      "occupancy": _maxSizeValue,
-      "maxRounds": _maxRoundsValue
+      "occupancy": _maxSizeValue!,
+      "maxRounds": _maxRoundsValue!,
     };
     if (_nameController.text.isNotEmpty &&
         _roomNameController.text.isNotEmpty &&
