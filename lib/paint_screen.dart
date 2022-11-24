@@ -1,8 +1,8 @@
 import 'package:drawize/models/my_custom_painter.dart';
-//import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:drawize/models/touch_points.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class PaintScreen extends StatefulWidget {
@@ -60,6 +60,7 @@ class _PaintScreenState extends State<PaintScreen> {
         }
       });
 
+      //listening to points changed in painting screen
       _socket.on('points', (point) {
         // print('takes');
         // print((point['details']['dx']).toDouble());
@@ -72,10 +73,22 @@ class _PaintScreenState extends State<PaintScreen> {
                 paint: Paint()
                   ..strokeCap = strokeType
                   ..isAntiAlias = true
-                  ..color = Colors.black.withOpacity(1)
-                  ..strokeWidth = 2));
+                  ..color = selectedColor.withOpacity(opacity)
+                  ..strokeWidth = strokeWidth));
           });
         }
+      });
+
+      //listening to color change request
+
+      _socket.on('color-change', (colorString) {
+        int value = int.parse(colorString, radix: 16);
+        // print(value);
+        Color otherColor = Color(value);
+        // print(otherColor);
+        setState(() {
+          selectedColor = otherColor;
+        });
       });
     });
   }
@@ -85,24 +98,36 @@ class _PaintScreenState extends State<PaintScreen> {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-    // void selectColor() {
-    //   showDialog(context: context, builder: (context) => AlertDialog(
-    //     title: const Text('Choose Color '),
-    //     content: SingleChildScrollView(
-    //       child: BlockPicker(pickerColor: selectedColor, onColorChanged: (color) {
-    //         String colorString = color.toString();
-    //         String valueString = colorString.split('(0x')[1].split(')')[0];
-    //         print(colorString);
-    //         print(valueString);
-    //         Map map = {
-    //           'color': valueString,
-    //           'roomName': dataOfRoom['name']
-    //         };
-    //         _socket.emit('color-change', map);
-    //       })
-    //     ),
-    //   ));
-    // }
+    void selectColor() {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: const Text('Choose Color '),
+                content: SingleChildScrollView(
+                    child: BlockPicker(
+                        pickerColor: selectedColor,
+                        onColorChanged: (color) {
+                          String colorString = color.toString();
+                          String valueString =
+                              colorString.split('(0x')[1].split(')')[0];
+                          // print(colorString);
+                          // print(valueString);
+                          Map map = {
+                            'color': valueString,
+                            'roomName': widget.data['name']
+                          };
+                          // print(map);
+                          _socket.emit('color-change', map);
+                        })),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Close'))
+                ],
+              ));
+    }
 
     return Scaffold(
       backgroundColor: Colors.blueGrey.shade100,
@@ -158,7 +183,9 @@ class _PaintScreenState extends State<PaintScreen> {
               Row(children: [
                 IconButton(
                   icon: Icon(Icons.color_lens, color: selectedColor),
-                  onPressed: () {},
+                  onPressed: () {
+                    selectColor();
+                  },
                 ),
                 Expanded(
                   child: Slider(

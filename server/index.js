@@ -116,7 +116,12 @@ io.on('connection',(socket) =>{
             io.to(roomName).emit('points',{details: details});
     })
 
-
+    //color callback
+    socket.on('color-change', async ({color, roomName})=>{
+        // console.log(color);
+        // console.log(roomName);
+        io.to(roomName).emit('color-change',color);
+    })
 });
 
 
