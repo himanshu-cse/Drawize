@@ -61,16 +61,21 @@ class _PaintScreenState extends State<PaintScreen> {
       });
 
       _socket.on('points', (point) {
-        setState(() {
-          points.add(TouchPoints(
-              points: Offset((point['details']['dx']).toDouble(),
-                  (point['details']['dy']).toDouble()),
-              paint: Paint()
-                ..strokeCap = strokeType
-                ..isAntiAlias = true
-                ..color = selectedColor.withOpacity(opacity)
-                ..strokeWidth = strokeWidth));
-        });
+        // print('takes');
+        // print((point['details']['dx']).toDouble());
+        if (point['details'] != null) {
+          // print((point['details']['dx']).toDouble());
+          setState(() {
+            points.add(TouchPoints(
+                points: Offset((point['details']['dx']).toDouble(),
+                    (point['details']['dy']).toDouble()),
+                paint: Paint()
+                  ..strokeCap = strokeType
+                  ..isAntiAlias = true
+                  ..color = Colors.black.withOpacity(1)
+                  ..strokeWidth = 2));
+          });
+        }
       });
     });
   }
@@ -112,7 +117,7 @@ class _PaintScreenState extends State<PaintScreen> {
                 height: height * 0.55,
                 child: GestureDetector(
                   onPanUpdate: (details) {
-                    print(details.localPosition.dx);
+                    // print(details.localPosition.dx);
                     _socket.emit('paint', {
                       'details': {
                         'dx': details.localPosition.dx,
@@ -122,7 +127,7 @@ class _PaintScreenState extends State<PaintScreen> {
                     });
                   },
                   onPanStart: (details) {
-                    print(details.localPosition.dx);
+                    // print(details.localPosition.dx);
                     _socket.emit('paint', {
                       'details': {
                         'dx': details.localPosition.dx,

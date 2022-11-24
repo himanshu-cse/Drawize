@@ -6,7 +6,8 @@ var server = http.createServer(app);
 const mongoose = require("mongoose");
 const Room = require("./models/room.js");
 var io = require("socket.io")(server);
-const getword = require('./api/words')
+const getword = require('./api/words');
+const { listIndexes } = require("./models/room.js");
 // import MongoClient from 'mongodb';
 
 
@@ -99,6 +100,20 @@ io.on('connection',(socket) =>{
         }catch(err){
             console.log(err);
         }
+    })
+
+
+    //painting area callback
+    socket.on('paint',async ({details,roomName})=>{
+        // if(details.dx != null){console.log(details)}
+        // console.log(typeof(details))
+        // console.log(roomName)
+        // let room = await Room.findOne({roomName});
+        // socket.join(roomName);
+        // for (let index = 0; index < room.players.length; index++) {
+            // console.log(room.players[index]);
+            // }
+            io.to(roomName).emit('points',{details: details});
     })
 
 
