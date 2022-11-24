@@ -90,6 +90,24 @@ class _PaintScreenState extends State<PaintScreen> {
           selectedColor = otherColor;
         });
       });
+
+      //listening for stroke change
+
+      _socket.on('stroke-width', (value) {
+        // print(value);
+        setState(() {
+          strokeWidth = value.toDouble();
+        });
+      });
+
+      //listening for clean-screen
+
+      _socket.on('clear', (data) {
+        // print(data);
+        setState(() {
+          points.clear();
+        });
+      });
     });
   }
 
@@ -197,14 +215,18 @@ class _PaintScreenState extends State<PaintScreen> {
                       onChanged: (double value) {
                         Map map = {
                           'value': value,
-                          'roomName': dataOfRoom['name']
+                          'roomName': widget.data['name'],
                         };
+                        // print(map);
                         _socket.emit('stroke-width', map);
                       }),
                 ),
                 IconButton(
                   icon: Icon(Icons.layers_clear, color: selectedColor),
-                  onPressed: () {},
+                  onPressed: () {
+                    _socket.emit('clear-screen', widget.data['name']);
+                    // print(widget.data['name']);
+                  },
                 ),
               ]),
             ],

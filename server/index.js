@@ -122,6 +122,21 @@ io.on('connection',(socket) =>{
         // console.log(roomName);
         io.to(roomName).emit('color-change',color);
     })
+
+
+    //stroke-width callback
+    socket.on('stroke-width', async ({value, roomName})=>{
+        // console.log(value);
+        // console.log(roomName);
+        io.to(roomName).emit('stroke-width',value);
+    })
+
+    //clear-screen callback
+    socket.on('clear-screen', (roomName)=>{
+        io.to(roomName).emit('clear',roomName);
+        // console.log(roomName);
+    })
+
 });
 
 
