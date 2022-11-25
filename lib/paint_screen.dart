@@ -397,40 +397,43 @@ class _PaintScreenState extends State<PaintScreen> {
                                           ),
                                         ),
                                       )),
-                            Row(children: [
-                              IconButton(
-                                icon: Icon(Icons.color_lens,
-                                    color: selectedColor),
-                                onPressed: () {
-                                  selectColor();
-                                },
-                              ),
-                              Expanded(
-                                child: Slider(
-                                    min: 1.0,
-                                    max: 10,
-                                    label: "Strokewidth $strokeWidth",
-                                    activeColor: selectedColor,
-                                    value: strokeWidth,
-                                    onChanged: (double value) {
-                                      Map map = {
-                                        'value': value,
-                                        'roomName': widget.data['name'],
-                                      };
-                                      // print(map);
-                                      _socket.emit('stroke-width', map);
-                                    }),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.layers_clear,
-                                    color: selectedColor),
-                                onPressed: () {
-                                  _socket.emit(
-                                      'clear-screen', widget.data['name']);
-                                  // print(widget.data['name']);
-                                },
-                              ),
-                            ]),
+                            dataOfRoom['turn']['nickname'] ==
+                                    widget.data['nickname']
+                                ? Row(children: [
+                                    IconButton(
+                                      icon: Icon(Icons.color_lens,
+                                          color: selectedColor),
+                                      onPressed: () {
+                                        selectColor();
+                                      },
+                                    ),
+                                    Expanded(
+                                      child: Slider(
+                                          min: 1.0,
+                                          max: 10,
+                                          label: "Strokewidth $strokeWidth",
+                                          activeColor: selectedColor,
+                                          value: strokeWidth,
+                                          onChanged: (double value) {
+                                            Map map = {
+                                              'value': value,
+                                              'roomName': widget.data['name'],
+                                            };
+                                            // print(map);
+                                            _socket.emit('stroke-width', map);
+                                          }),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.layers_clear,
+                                          color: selectedColor),
+                                      onPressed: () {
+                                        _socket.emit('clear-screen',
+                                            widget.data['name']);
+                                        // print(widget.data['name']);
+                                      },
+                                    ),
+                                  ])
+                                : Container(),
                             dataOfRoom['turn']['nickname'] !=
                                     widget.data['nickname']
                                 ? Row(

@@ -112,7 +112,7 @@ io.on('connection',(socket) =>{
                 let room = await Room.find({name: data.roomName})
                 let userPlayer = room[0].players.filter((player) => player.nickname === data.username)
                 if (data.timeTaken !== 0) {
-                    userPlayer[0].points+= 100;   
+                    userPlayer[0].points+= Math.round(2000/data.timetaken);   
                 }
                 room =await room[0].save();
                 io.to(data.roomName).emit('msg',{

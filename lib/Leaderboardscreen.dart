@@ -11,24 +11,25 @@ class Leaderboardscreen extends StatelessWidget {
     map[y] = temp;
   }
 
-  void score() {
+  void score() {}
+
+  @override
+  Widget build(BuildContext context) {
     int max_idx;
     for (int i = 0; i < scoreboard.length - 1; i++) {
       max_idx = i;
       for (var j = 0; j < scoreboard.length; j++) {
-        if (int.parse(scoreboard[j]['points']) >
-            int.parse(scoreboard[max_idx]['points'])) {
+        if (int.parse(scoreboard[j].values.elementAt(1)) >
+            int.parse(scoreboard[max_idx].values.elementAt(1))) {
           max_idx = j;
         }
         if (max_idx != i) {
-          swap(scoreboard, i, max_idx);
+          var temp = scoreboard[i];
+          scoreboard[i] = scoreboard[max_idx];
+          scoreboard[max_idx] = temp;
         }
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
