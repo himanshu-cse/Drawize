@@ -54,7 +54,8 @@ io.on('connection',(socket) =>{
             room.players.push(player);
             room = await room.save();
             socket.join(name);
-            io.to(nickname).emit('updateRoom',room);
+            // console.log(room);
+            io.to(name).emit('updateRoom',room);
 
 
         }catch(err){
@@ -89,7 +90,7 @@ io.on('connection',(socket) =>{
                 }
                 room.turn = room.players[room.turnIndex];
                 room = await room.save();
-                io.to(nickname).emit('updateRoom',room);
+                io.to(name).emit('updateRoom',room);
             }
             else{
                 socket.emit('notCorrectGame', 'Room is full, please try again later!');
