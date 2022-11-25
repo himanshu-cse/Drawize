@@ -3,7 +3,8 @@ import 'create_room_screen.dart';
 import 'join_room_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String message;
+  const HomeScreen({super.key, required this.message});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -12,6 +13,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    if (widget.message != '') {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(widget.message)));
+    }
     return Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -24,31 +29,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: const BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage('assets/title.png'),
-                        fit:BoxFit.fitWidth)),
+                        fit: BoxFit.fitWidth)),
                 margin: EdgeInsets.only(
                     top: 40,
-                    left: MediaQuery.of(context).size.width*0.2,
-                    right: MediaQuery.of(context).size.width*0.2,
+                    left: MediaQuery.of(context).size.width * 0.2,
+                    right: MediaQuery.of(context).size.width * 0.2,
                     bottom: MediaQuery.of(context).size.height * 0.7),
               ),
               Container(
-                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height*.6),
+                margin: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * .6),
                 alignment: Alignment.center,
                 child: Column(
                   children: [
                     ElevatedButton(
                         onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const CreateRoomScreen(),
-                          ),
-                        ),
+                              MaterialPageRoute(
+                                builder: (context) => const CreateRoomScreen(),
+                              ),
+                            ),
                         style: ButtonStyle(
                             backgroundColor:
-                            MaterialStateProperty.all(Colors.green),
+                                MaterialStateProperty.all(Colors.green),
                             textStyle: MaterialStateProperty.all(
                                 const TextStyle(color: Colors.white)),
                             minimumSize: MaterialStateProperty.all(Size(
-                                MediaQuery.of(context).size.width*.3, 50))),
+                                MediaQuery.of(context).size.width * .3, 50))),
                         child: const Text(
                           style: TextStyle(fontSize: 20),
                           "Create",
@@ -58,24 +64,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     ElevatedButton(
                         onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const JoinRoomScreen(),
-                          ),
-                        ),
+                              MaterialPageRoute(
+                                builder: (context) => const JoinRoomScreen(),
+                              ),
+                            ),
                         style: ButtonStyle(
                             backgroundColor:
-                            MaterialStateProperty.all(Colors.green),
+                                MaterialStateProperty.all(Colors.green),
                             textStyle: MaterialStateProperty.all(
                                 const TextStyle(color: Colors.white)),
                             minimumSize: MaterialStateProperty.all(Size(
-                                MediaQuery.of(context).size.width*.2, 50))),
+                                MediaQuery.of(context).size.width * .2, 50))),
                         child: const Text(
                           style: TextStyle(fontSize: 20),
                           "Join",
                         ))
                   ],
                 ),
-
               ),
             ])));
   }

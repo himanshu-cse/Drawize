@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:drawize/home_screen.dart';
 import 'package:drawize/models/my_custom_painter.dart';
 import 'package:drawize/models/touch_points.dart';
 import 'package:drawize/scoreboard.dart';
 import 'package:drawize/waiting_lobby_screen.dart';
-import 'package:flutter/gestures.dart';
+import 'Leaderboardscreen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -46,11 +47,25 @@ class _PaintScreenState extends State<PaintScreen> {
   var scaffoldkey = GlobalKey<ScaffoldState>();
   List<Map> scoreboard = [];
   bool Textinputclose = false;
+  List<Map> Leaderboard = [];
+  bool leaderboardscreen = false;
 
   @override
   void initState() {
     super.initState();
     connect();
+  }
+
+  void swap(List<Map> map, int x, int y) {
+    var temp = map[x];
+    map[x] = map[y];
+    map[y] = temp;
+  }
+
+  void selectionsort(List<Map> map) {
+    var i, j, min_idx, n;
+    n = map.length;
+    for (int i = 0; i < n - 1; i++) {}
   }
 
   void startTimer() {
@@ -111,6 +126,7 @@ class _PaintScreenState extends State<PaintScreen> {
         if (roomData['isJoin'] != true) {
           //start the timer
           startTimer();
+          scoreboard.clear();
           for (int i = 0; i < roomData['players'].length; i++) {
             setState(() {
               scoreboard.add({
@@ -239,7 +255,24 @@ class _PaintScreenState extends State<PaintScreen> {
           });
         }
       }));
+
+      //listening for notcorrectgame
+      _socket.on(
+          'notcorrectgame',
+          (data) => Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (context) => HomeScreen(
+                        message: data,
+                      )),
+              (route) => false));
     });
+  }
+
+  @override
+  void dispose() {
+    _socket.dispose();
+    _timer.cancel();
+    super.dispose();
   }
 
   @override
@@ -294,50 +327,64 @@ class _PaintScreenState extends State<PaintScreen> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         SizedBox(
-                          width: width,
-                          height: height * 0.55,
-                          child: GestureDetector(
-                            onPanUpdate: (details) {
-                              // print(details.localPosition.dx);
-                              _socket.emit('paint', {
-                                'details': {
-                                  'dx': details.localPosition.dx,
-                                  'dy': details.localPosition.dy,
-                                },
-                                'roomName': widget.data['name'],
-                              });
-                            },
-                            onPanStart: (details) {
-                              // print(details.localPosition.dx);
-                              _socket.emit('paint', {
-                                'details': {
-                                  'dx': details.localPosition.dx,
-                                  'dy': details.localPosition.dy,
-                                },
-                                'roomName': widget.data['name'],
-                              });
-                            },
-                            onPanEnd: (details) {
-                              _socket.emit('paint', {
-                                'details': null,
-                                'roomName': widget.data['name'],
-                              });
-                            },
-                            child: SizedBox.expand(
-                              child: ClipRRect(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(20)),
-                                child: RepaintBoundary(
-                                  child: CustomPaint(
-                                    size: Size.infinite,
-                                    painter:
-                                        MyCustomPainter(pointsList: points),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                            width: width,
+                            height: height * 0.55,
+                            child: dataOfRoom['turn']['nickname'] ==
+                                    widget.data['nickname']
+                                ? GestureDetector(
+                                    onPanUpdate: (details) {
+                                      // print(details.localPosition.dx);
+                                      _socket.emit('paint', {
+                                        'details': {
+                                          'dx': details.localPosition.dx,
+                                          'dy': details.localPosition.dy,
+                                        },
+                                        'roomName': widget.data['name'],
+                                      });
+                                    },
+                                    onPanStart: (details) {
+                                      // print(details.localPosition.dx);
+                                      _socket.emit('paint', {
+                                        'details': {
+                                          'dx': details.localPosition.dx,
+                                          'dy': details.localPosition.dy,
+                                        },
+                                        'roomName': widget.data['name'],
+                                      });
+                                    },
+                                    onPanEnd: (details) {
+                                      _socket.emit('paint', {
+                                        'details': null,
+                                        'roomName': widget.data['name'],
+                                      });
+                                    },
+                                    child: SizedBox.expand(
+                                      child: ClipRRect(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(20)),
+                                        child: RepaintBoundary(
+                                          child: CustomPaint(
+                                            size: Size.infinite,
+                                            painter: MyCustomPainter(
+                                                pointsList: points),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : SizedBox.expand(
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20)),
+                                      child: RepaintBoundary(
+                                        child: CustomPaint(
+                                          size: Size.infinite,
+                                          painter: MyCustomPainter(
+                                              pointsList: points),
+                                        ),
+                                      ),
+                                    ),
+                                  )),
                         Row(children: [
                           IconButton(
                             icon: Icon(Icons.color_lens, color: selectedColor),

@@ -36,7 +36,7 @@ io.on('connection',(socket) =>{
         try{
             const isRoomNotNew = await Room.findOne({name});
             if (isRoomNotNew){
-                socket.emit('roomalreadyexist', 'Room with that ID already exists!');
+                socket.emit('notcorrectgame', 'Room with that ID already exists!');
                 return;
             }
             let room = new Room();
@@ -170,6 +170,8 @@ io.on('connection',(socket) =>{
                 
             }else{
                 // show leaderboard
+
+                io.to(name).emit('leaderboard', room.players);
             }
 
 
@@ -212,6 +214,38 @@ io.on('connection',(socket) =>{
     socket.on('clear-screen', (roomName)=>{
         io.to(roomName).emit('clear',roomName);
         // console.log(roomName);
+    })
+
+
+
+    //user disconnects
+    socket.on('disconnect', async () =>{
+        try {
+            let room = await Room.findOne({"players.socketID": socket.id});
+            let disconnecteduser ;
+            for (let i = 0; i < room.players.length; i++) {
+                if (room.players[i].socketID === socket.id) {
+                    disconnecteduser = room.players[i].nickname;
+                    room.players.splice(i,1);
+                break;
+            }
+            }
+            room = await room.save();
+            if (room.players.length === 1) {
+                socket.broadcast.to(room.name).emit('leaderboard', room.players);
+            }else{
+
+                socket.broadcast.to(room.name).emit('userdisconnected', 
+                {
+                    players : room.players,
+                    disconnecteduser : disconnecteduser});
+            }
+                
+
+
+        } catch (error) {
+            console.log(error);
+        }
     })
 
 });

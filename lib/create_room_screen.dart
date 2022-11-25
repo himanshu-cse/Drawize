@@ -126,7 +126,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                         _maxRoundsValue = newValue;
                       });
                     },
-                    items: <String>['2', '3', '4', '5', '10', '15', '20']
+                    items: <String>['1', '2', '3', '4', '5', '10', '15', '20']
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem(
                         value: value,
@@ -212,7 +212,9 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     color: Colors.black,
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
+                        builder: (context) => const HomeScreen(
+                          message: '',
+                        ),
                       ),
                     ),
                     icon: const Icon(Icons.arrow_back),

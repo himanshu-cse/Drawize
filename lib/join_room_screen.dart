@@ -118,7 +118,9 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                     color: Colors.black,
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
+                        builder: (context) => const HomeScreen(
+                          message: '',
+                        ),
                       ),
                     ),
                     icon: const Icon(Icons.arrow_back),
