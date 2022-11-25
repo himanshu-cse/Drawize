@@ -1,14 +1,32 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
-class Leaderboardscreen extends StatefulWidget {
-  final List<Map> leaderboard;
-  const Leaderboardscreen(this.leaderboard);
+class Leaderboardscreen extends StatelessWidget {
+  final scoreboard;
+  Leaderboardscreen(this.scoreboard);
+  void swap(List<Map> map, int x, int y) {
+    var temp = map[x];
+    map[x] = map[y];
+    map[y] = temp;
+  }
 
-  @override
-  State<Leaderboardscreen> createState() => _LeaderboardState();
-}
+  void score() {
+    int max_idx;
+    for (int i = 0; i < scoreboard.length - 1; i++) {
+      max_idx = i;
+      for (var j = 0; j < scoreboard.length; j++) {
+        if (int.parse(scoreboard[j]['points']) >
+            int.parse(scoreboard[max_idx]['points'])) {
+          max_idx = j;
+        }
+        if (max_idx != i) {
+          swap(scoreboard, i, max_idx);
+        }
+      }
+    }
+  }
 
-class _LeaderboardState extends State<Leaderboardscreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -34,12 +52,16 @@ class _LeaderboardState extends State<Leaderboardscreen> {
               height: MediaQuery.of(context).size.height * 0.1,
             ),
             Container(
+                margin: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.3),
                 alignment: Alignment.center,
                 child: Column(children: [
                   ListView.builder(
-                      itemCount: widget.leaderboard.length,
+                      primary: true,
+                      shrinkWrap: true,
+                      itemCount: scoreboard.length,
                       itemBuilder: (context, index) {
-                        var data = widget.leaderboard[index].values;
+                        var data = scoreboard[index].values;
                         return ListTile(
                           title: Text(
                             '${index + 1}. ${data.elementAt(0)}',
@@ -50,15 +72,15 @@ class _LeaderboardState extends State<Leaderboardscreen> {
                           ),
                           trailing: Text('score : ${data.elementAt(1)}.',
                               style: const TextStyle(
-                                color: Colors.grey,
+                                color: Color.fromARGB(255, 4, 60, 6),
                                 fontSize: 20,
                               )),
                         );
                       }),
                   Text(
-                      '${widget.leaderboard[0].values.elementAt(0).toString()} is the winner!',
+                      '${scoreboard[0].values.elementAt(0).toString()} is the winner!',
                       style: const TextStyle(
-                          color: Colors.green,
+                          color: Color.fromARGB(255, 110, 48, 60),
                           fontSize: 30,
                           fontWeight: FontWeight.bold))
                 ])),

@@ -266,6 +266,16 @@ class _PaintScreenState extends State<PaintScreen> {
                       )),
               (route) => false));
     });
+
+    //listening for leaderboard
+    _socket.on('leaderboard', (data) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('copied!')));
+      setState(() {
+        _timer.cancel();
+        leaderboardscreen = true;
+      });
+    });
   }
 
   @override
@@ -320,204 +330,211 @@ class _PaintScreenState extends State<PaintScreen> {
       // ignore: unnecessary_null_comparison
       body: dataOfRoom != null
           ? dataOfRoom['isJoin'] != true
-              ? Stack(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
+              ? !leaderboardscreen
+                  ? Stack(
                       children: [
-                        SizedBox(
-                            width: width,
-                            height: height * 0.55,
-                            child: dataOfRoom['turn']['nickname'] ==
-                                    widget.data['nickname']
-                                ? GestureDetector(
-                                    onPanUpdate: (details) {
-                                      // print(details.localPosition.dx);
-                                      _socket.emit('paint', {
-                                        'details': {
-                                          'dx': details.localPosition.dx,
-                                          'dy': details.localPosition.dy,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                                width: width,
+                                height: height * 0.55,
+                                child: dataOfRoom['turn']['nickname'] ==
+                                        widget.data['nickname']
+                                    ? GestureDetector(
+                                        onPanUpdate: (details) {
+                                          // print(details.localPosition.dx);
+                                          _socket.emit('paint', {
+                                            'details': {
+                                              'dx': details.localPosition.dx,
+                                              'dy': details.localPosition.dy,
+                                            },
+                                            'roomName': widget.data['name'],
+                                          });
                                         },
-                                        'roomName': widget.data['name'],
-                                      });
-                                    },
-                                    onPanStart: (details) {
-                                      // print(details.localPosition.dx);
-                                      _socket.emit('paint', {
-                                        'details': {
-                                          'dx': details.localPosition.dx,
-                                          'dy': details.localPosition.dy,
+                                        onPanStart: (details) {
+                                          // print(details.localPosition.dx);
+                                          _socket.emit('paint', {
+                                            'details': {
+                                              'dx': details.localPosition.dx,
+                                              'dy': details.localPosition.dy,
+                                            },
+                                            'roomName': widget.data['name'],
+                                          });
                                         },
-                                        'roomName': widget.data['name'],
-                                      });
-                                    },
-                                    onPanEnd: (details) {
-                                      _socket.emit('paint', {
-                                        'details': null,
-                                        'roomName': widget.data['name'],
-                                      });
-                                    },
-                                    child: SizedBox.expand(
-                                      child: ClipRRect(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(20)),
-                                        child: RepaintBoundary(
-                                          child: CustomPaint(
-                                            size: Size.infinite,
-                                            painter: MyCustomPainter(
-                                                pointsList: points),
+                                        onPanEnd: (details) {
+                                          _socket.emit('paint', {
+                                            'details': null,
+                                            'roomName': widget.data['name'],
+                                          });
+                                        },
+                                        child: SizedBox.expand(
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                    Radius.circular(20)),
+                                            child: RepaintBoundary(
+                                              child: CustomPaint(
+                                                size: Size.infinite,
+                                                painter: MyCustomPainter(
+                                                    pointsList: points),
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  )
-                                : SizedBox.expand(
-                                    child: ClipRRect(
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(20)),
-                                      child: RepaintBoundary(
-                                        child: CustomPaint(
-                                          size: Size.infinite,
-                                          painter: MyCustomPainter(
-                                              pointsList: points),
+                                      )
+                                    : SizedBox.expand(
+                                        child: ClipRRect(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(20)),
+                                          child: RepaintBoundary(
+                                            child: CustomPaint(
+                                              size: Size.infinite,
+                                              painter: MyCustomPainter(
+                                                  pointsList: points),
+                                            ),
+                                          ),
                                         ),
+                                      )),
+                            Row(children: [
+                              IconButton(
+                                icon: Icon(Icons.color_lens,
+                                    color: selectedColor),
+                                onPressed: () {
+                                  selectColor();
+                                },
+                              ),
+                              Expanded(
+                                child: Slider(
+                                    min: 1.0,
+                                    max: 10,
+                                    label: "Strokewidth $strokeWidth",
+                                    activeColor: selectedColor,
+                                    value: strokeWidth,
+                                    onChanged: (double value) {
+                                      Map map = {
+                                        'value': value,
+                                        'roomName': widget.data['name'],
+                                      };
+                                      // print(map);
+                                      _socket.emit('stroke-width', map);
+                                    }),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.layers_clear,
+                                    color: selectedColor),
+                                onPressed: () {
+                                  _socket.emit(
+                                      'clear-screen', widget.data['name']);
+                                  // print(widget.data['name']);
+                                },
+                              ),
+                            ]),
+                            dataOfRoom['turn']['nickname'] !=
+                                    widget.data['nickname']
+                                ? Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: textBlankWidget,
+                                  )
+                                : Center(
+                                    child: Column(children: [
+                                      Text(
+                                        dataOfRoom['word'],
+                                        style: const TextStyle(fontSize: 30),
+                                      )
+                                    ]),
+                                  ),
+                            Container(
+                              height: height * 0.3,
+                              child: ListView.builder(
+                                  controller: _scrollController,
+                                  shrinkWrap: true,
+                                  itemCount: messages.length,
+                                  itemBuilder: ((context, index) {
+                                    var msg = messages[index].values;
+                                    return ListTile(
+                                      title: Text(msg.elementAt(0),
+                                          style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 19,
+                                              fontWeight: FontWeight.bold)),
+                                      subtitle: Text(
+                                        msg.elementAt(1),
+                                        style: const TextStyle(
+                                            color: Colors.grey, fontSize: 16),
                                       ),
-                                    ),
-                                  )),
-                        Row(children: [
-                          IconButton(
-                            icon: Icon(Icons.color_lens, color: selectedColor),
-                            onPressed: () {
-                              selectColor();
-                            },
-                          ),
-                          Expanded(
-                            child: Slider(
-                                min: 1.0,
-                                max: 10,
-                                label: "Strokewidth $strokeWidth",
-                                activeColor: selectedColor,
-                                value: strokeWidth,
-                                onChanged: (double value) {
-                                  Map map = {
-                                    'value': value,
-                                    'roomName': widget.data['name'],
-                                  };
-                                  // print(map);
-                                  _socket.emit('stroke-width', map);
-                                }),
-                          ),
-                          IconButton(
-                            icon:
-                                Icon(Icons.layers_clear, color: selectedColor),
-                            onPressed: () {
-                              _socket.emit('clear-screen', widget.data['name']);
-                              // print(widget.data['name']);
-                            },
-                          ),
-                        ]),
+                                    );
+                                  })),
+                            )
+                          ],
+                        ),
                         dataOfRoom['turn']['nickname'] !=
                                 widget.data['nickname']
-                            ? Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: textBlankWidget,
-                              )
-                            : Center(
-                                child: Column(children: [
-                                  Text('${dataOfRoom['turn']['nickname']}'),
-                                  (Text('${widget.data['nickname']}')),
-                                  Text(
-                                    dataOfRoom['word'],
-                                    style: const TextStyle(fontSize: 30),
-                                  )
-                                ]),
-                              ),
-                        Container(
-                          height: height * 0.3,
-                          child: ListView.builder(
-                              controller: _scrollController,
-                              shrinkWrap: true,
-                              itemCount: messages.length,
-                              itemBuilder: ((context, index) {
-                                var msg = messages[index].values;
-                                return ListTile(
-                                  title: Text(msg.elementAt(0),
-                                      style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 19,
-                                          fontWeight: FontWeight.bold)),
-                                  subtitle: Text(
-                                    msg.elementAt(1),
-                                    style: const TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                  ),
-                                );
-                              })),
-                        )
-                      ],
-                    ),
-                    dataOfRoom['turn']['nickname'] != widget.data['nickname']
-                        ? Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 10),
-                              child: TextField(
-                                readOnly: Textinputclose,
-                                controller: controller,
-                                onSubmitted: (value) {
-                                  if (value.trim().isNotEmpty) {
-                                    Map map = {
-                                      'username': widget.data['nickname'],
-                                      'msg': value.trim(),
-                                      'word': dataOfRoom['word'],
-                                      'roomName': dataOfRoom['name'],
-                                      'guessedUserCounter': guessedUserCounter,
-                                      'totalTime': 60,
-                                      'timetaken': 60 - _timeLeft,
-                                    };
-                                    _socket.emit('msg', map);
-                                    controller.clear();
-                                  }
-                                },
-                                autocorrect: false,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: const BorderSide(
-                                        color: Colors.transparent),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: const BorderSide(
-                                        color: Colors.transparent),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 14),
-                                  filled: true,
-                                  fillColor: const Color(0xffF5F5FA),
-                                  hintText: 'Type your guess',
-                                  hintStyle: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
+                            ? Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 10),
+                                  child: TextField(
+                                    readOnly: Textinputclose,
+                                    controller: controller,
+                                    onSubmitted: (value) {
+                                      if (value.trim().isNotEmpty) {
+                                        Map map = {
+                                          'username': widget.data['nickname'],
+                                          'msg': value.trim(),
+                                          'word': dataOfRoom['word'],
+                                          'roomName': dataOfRoom['name'],
+                                          'guessedUserCounter':
+                                              guessedUserCounter,
+                                          'totalTime': 60,
+                                          'timetaken': 60 - _timeLeft,
+                                        };
+                                        _socket.emit('msg', map);
+                                        controller.clear();
+                                      }
+                                    },
+                                    autocorrect: false,
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: const BorderSide(
+                                            color: Colors.transparent),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: const BorderSide(
+                                            color: Colors.transparent),
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 14),
+                                      filled: true,
+                                      fillColor: const Color(0xffF5F5FA),
+                                      hintText: 'Type your guess',
+                                      hintStyle: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    textInputAction: TextInputAction.done,
                                   ),
                                 ),
-                                textInputAction: TextInputAction.done,
-                              ),
-                            ),
-                          )
-                        : Container(),
-                    SafeArea(
-                        child: IconButton(
-                      icon: const Icon(
-                        Icons.menu,
-                        color: Colors.black,
-                      ),
-                      onPressed: () => scaffoldkey.currentState!.openDrawer(),
-                    ))
-                  ],
-                )
+                              )
+                            : Container(),
+                        SafeArea(
+                            child: IconButton(
+                          icon: const Icon(
+                            Icons.menu,
+                            color: Colors.black,
+                          ),
+                          onPressed: () =>
+                              scaffoldkey.currentState!.openDrawer(),
+                        ))
+                      ],
+                    )
+                  : Leaderboardscreen(scoreboard)
               : WaitingLobbyScreen(
                   lobbyName: dataOfRoom['name'],
                   noOfPlayers: dataOfRoom['players'].length,
