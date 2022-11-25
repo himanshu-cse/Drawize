@@ -11,7 +11,7 @@ const playerSchema = new mongoose.Schema({
         type: String,
         default: false,
     },
-    score: {
+    points: {
         type: Number,
         default: 0
     }

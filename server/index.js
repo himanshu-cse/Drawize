@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const Room = require("./models/room.js");
 var io = require("socket.io")(server);
 const getword = require('./api/words');
-const { listIndexes } = require("./models/room.js");
+const { listIndexes, find } = require("./models/room.js");
 // import MongoClient from 'mongodb';
 
 
@@ -102,6 +102,68 @@ io.on('connection',(socket) =>{
             console.log(err);
         }
     })
+
+
+    //chat message callback
+    socket.on('msg', async (data)=>{
+
+        try {
+            if (data.msg === data.word) {
+                let room = await Room.find({name: data.roomName})
+                let userPlayer = room[0].players.filter((player) => player.nickname === data.username)
+                if (data.timeTaken !== 0) {
+                    userPlayer[0].points+= 100;   
+                }
+                room =await room[0].save();
+                io.to(data.roomName).emit('msg',{
+                    username: data.username,
+                    msg : 'Correct Guess!',
+                    guessedUserCounter: data.guessedUserCounter+1,
+                })
+            }else{
+                io.to(data.roomName).emit('msg', {
+                    username: data.username,
+                    msg : data.msg,
+                    guessedUserCounter: data.guessedUserCounter,
+                })
+            }
+            
+        } catch (error) {
+            console.log(error);
+        }
+    })
+
+
+    //change turn callback
+    socket.on('change-turn', async(name)=>{
+        try {
+
+            console.log('change-turn');
+            let room = await Room.findOne({name});
+            let trnindx = room.turnIndex;
+            console.log(trnindx);
+            if (trnindx+1 === room.players.length) {
+                room.currentRound+=1;
+            }
+            if (room.currentRound<= room.maxRounds) {
+                const word = getword();
+                room.word = word;
+                room.turnIndex = (trnindx+1) % room.players.length;
+                room.turn = room.players[room.turnIndex];
+                // console.log(room);
+                room = await room.save();
+                io.to(name).emit('change-turn', room);
+                
+            }else{
+                // show leaderboard
+            }
+
+
+        } catch (error) {
+            console.log(error);
+        }
+    })
+
 
 
     //painting area callback
