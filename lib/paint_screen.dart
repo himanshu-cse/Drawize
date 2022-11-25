@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:drawize/models/my_custom_painter.dart';
 import 'package:drawize/models/touch_points.dart';
+import 'package:drawize/scoreboard.dart';
 import 'package:drawize/waiting_lobby_screen.dart';
 import 'package:flutter/gestures.dart';
 
@@ -43,6 +44,9 @@ class _PaintScreenState extends State<PaintScreen> {
   int _timeLeft = 60;
   late Timer _timer;
   var scaffoldkey = GlobalKey<ScaffoldState>();
+  List<Map> scoreboard = [];
+  bool Textinputclose = false;
+
   @override
   void initState() {
     super.initState();
@@ -107,6 +111,14 @@ class _PaintScreenState extends State<PaintScreen> {
         if (roomData['isJoin'] != true) {
           //start the timer
           startTimer();
+          for (int i = 0; i < roomData['players'].length; i++) {
+            setState(() {
+              scoreboard.add({
+                'username': roomData['players'][i]['nickname'],
+                'score': roomData['players'][i]['points'].toString(),
+              });
+            });
+          }
         }
       });
 
@@ -160,6 +172,7 @@ class _PaintScreenState extends State<PaintScreen> {
                 setState(() {
                   dataOfRoom = data;
                   renderTextBlank(data['word']);
+                  Textinputclose = false;
                   guessedUserCounter = 0;
                   _timeLeft = 60;
                   points.clear();
@@ -205,6 +218,27 @@ class _PaintScreenState extends State<PaintScreen> {
           points.clear();
         });
       });
+
+      // listening for input close
+      _socket.on('closeInput', (data) {
+        _socket.emit('updatescore', widget.data['name']);
+        setState(() {
+          Textinputclose = true;
+        });
+      });
+
+      // listening for update score
+      _socket.on('updatescore', ((data) {
+        scoreboard.clear();
+        for (int i = 0; i < data['players'].length; i++) {
+          setState(() {
+            scoreboard.add({
+              'username': data['players'][i]['nickname'],
+              'score': data['players'][i]['points'].toString(),
+            });
+          });
+        }
+      }));
     });
   }
 
@@ -247,6 +281,8 @@ class _PaintScreenState extends State<PaintScreen> {
     // print(dataOfRoom);
 
     return Scaffold(
+      key: scaffoldkey,
+      drawer: playerScoreboard(scoreboard),
       backgroundColor: Colors.blueGrey.shade100,
       // ignore: unnecessary_null_comparison
       body: dataOfRoom != null
@@ -381,6 +417,7 @@ class _PaintScreenState extends State<PaintScreen> {
                             child: Container(
                               margin: EdgeInsets.symmetric(horizontal: 10),
                               child: TextField(
+                                readOnly: Textinputclose,
                                 controller: controller,
                                 onSubmitted: (value) {
                                   if (value.trim().isNotEmpty) {
@@ -424,6 +461,14 @@ class _PaintScreenState extends State<PaintScreen> {
                             ),
                           )
                         : Container(),
+                    SafeArea(
+                        child: IconButton(
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Colors.black,
+                      ),
+                      onPressed: () => scaffoldkey.currentState!.openDrawer(),
+                    ))
                   ],
                 )
               : WaitingLobbyScreen(

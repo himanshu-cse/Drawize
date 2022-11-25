@@ -120,6 +120,7 @@ io.on('connection',(socket) =>{
                     msg : 'Correct Guess!',
                     guessedUserCounter: data.guessedUserCounter+1,
                 })
+                socket.emit('closeInput',"")
             }else{
                 io.to(data.roomName).emit('msg', {
                     username: data.username,
@@ -132,6 +133,19 @@ io.on('connection',(socket) =>{
             console.log(error);
         }
     })
+
+
+
+    //updat score callback
+    socket.on('updatescore', async (name)=>{
+        try {
+            const room = await Room.findOne({name});
+            io.to(name).emit('updatescore', room);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    )
 
 
     //change turn callback
