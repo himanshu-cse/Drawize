@@ -1,4 +1,4 @@
-# Pictionary
+# Drawize
 
 A Flutter project which uses concepts of javascript, socket.io and mongoDB for major work.
 
