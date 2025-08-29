@@ -6,7 +6,7 @@ A Flutter project which uses concepts of javascript, socket.io and mongoDB for m
 
 ## About Game
 
-- Pictionary is a free online multiplayer drawing and guessing pictionary game.
+- Drawize is a free online multiplayer drawing and guessing pictionary game.
 
 - A normal game consists of a few rounds, where every round a player has to draw their chosen word and others have to guess it to gain points!
 
